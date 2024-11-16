@@ -1,3 +1,8 @@
 node_modules
 
 .env
+
+# Ignore everything in public folder except the .gitkeep file
+public/*
+!public/.gitkeep
+

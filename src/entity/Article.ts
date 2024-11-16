@@ -31,7 +31,7 @@ export class Article {
   @Column({ enum: ["draft", "published", "archived"] })
   status: string;
 
-  @Column()
+  @Column({ default: false })
   isBreaking: boolean;
 
   @CreateDateColumn()

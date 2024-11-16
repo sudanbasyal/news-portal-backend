@@ -7,6 +7,7 @@ import { IConfig } from "./interface/configuration";
 dotenv.config({ path: __dirname + "/../.env" });
 
 const config: IConfig = {
+  apiUrl: requireEnv("API_URL"),
   port: requireEnv("PORT"),
   jwt: {
     secret: requireEnv("JWT_SECRET"),

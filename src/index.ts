@@ -1,5 +1,6 @@
 import express from "express";
 import "reflect-metadata";
+import path from "path";
 
 import cors from "cors";
 import helmet from "helmet";
@@ -12,6 +13,9 @@ import router from "./route";
 const app = express();
 
 app.use(helmet());
+
+// Serve static files for uploads
+app.use("/public", express.static(path.join(__dirname, "../public")));
 
 app.use(
   cors({

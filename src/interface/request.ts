@@ -5,4 +5,5 @@ export interface Request<P = any, ResBody = any, ReqBody = any, ReqQuery = {}>
   extends ExpressRequest<P, ResBody, ReqBody, ReqQuery> {
   user?: User;
   refreshToken?: string | null;
+  file?: Express.Multer.File;
 }

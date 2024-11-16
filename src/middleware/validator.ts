@@ -40,6 +40,7 @@ export function validateReqBody(schema: Schema) {
 }
 
 export function validateReqParams(schema: Schema) {
+  logger.info("Validating request params");
   return (req: Request, res: Response, next: NextFunction) => {
     logger.info("Validating request params");
     const { error, value } = schema.validate(req.params);
@@ -52,3 +53,22 @@ export function validateReqParams(schema: Schema) {
     next();
   };
 }
+
+export const validateFormData = (schema: Schema) => {
+  logger.info("Validating form data");
+  return (req: Request, res: Response, next: NextFunction) => {
+    try {
+      logger.info("Validating form data");
+      const { error } = schema.validate(req.body);
+
+      if (error) {
+        throw new BadRequestError(error.details[0].message);
+      }
+
+      next();
+    } catch (error) {
+      logger.error("Error validating form data", { error });
+      next(error);
+    }
+  };
+};

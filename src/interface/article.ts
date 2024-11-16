@@ -4,6 +4,6 @@ export interface Article {
   content: string;
   viewCount: number;
   slug: string;
-  status: string;
+  status: "draft" | "published" | "archived";
   isBreaking: boolean;
 }

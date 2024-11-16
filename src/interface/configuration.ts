@@ -24,4 +24,5 @@ export interface IConfig {
     accessExpiration: number;
     refreshTokenExpiration: number;
   };
+  apiUrl: string;
 }

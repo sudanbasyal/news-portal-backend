@@ -12,7 +12,8 @@ export const addArticle = async (
 ) => {
   try {
     articleController.info("Adding new article");
-    const addArticle = await articleService.newArticle(req.body);
+
+    const addArticle = await articleService.newArticle(req.body, req.file);
     res.status(httpStatusCode.CREATED).json({
       message: "Article added successfully",
     });
@@ -84,6 +85,27 @@ export const deleteArticle = async (
     const deleteArticle = await articleService.deleteArticle(id);
     res.status(httpStatusCode.OK).json({
       message: "Article deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changeArticleStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    articleController.info("Changing article status");
+    const id = req.params.id;
+    const status = req.body.status;
+    const changeArticleStatus = await articleService.changeArticleStatus(
+      id,
+      status
+    );
+    res.status(httpStatusCode.OK).json({
+      message: "Article status changed successfully",
     });
   } catch (error) {
     next(error);
