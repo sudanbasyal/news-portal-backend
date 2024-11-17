@@ -5,8 +5,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
 } from "typeorm";
 import { Comment } from "./Comment";
+import { Tag } from "./Tag";
+import { Category } from "./Category";
 
 @Entity({ name: "articles" })
 export class Article {
@@ -42,4 +47,23 @@ export class Article {
 
   @OneToMany(() => Comment, (comment) => comment.article)
   comments: Comment[];
+
+  @ManyToMany(() => Tag, (tag) => tag.articles, { cascade: true })
+  @JoinTable({
+    name: "article_tags",
+    joinColumn: {
+      name: "article_id",
+      referencedColumnName: "id",
+    },
+    inverseJoinColumn: {
+      name: "tag_id",
+      referencedColumnName: "id",
+    },
+  })
+  tags: Tag[];
+
+  @ManyToOne(() => Category, (category) => category.articles, {
+    nullable: false,
+  })
+  category: Category;
 }
