@@ -27,7 +27,6 @@ export function validateReqBody(schema: Schema) {
     logger.info("Validating request body");
 
     const { error, value } = schema.validate(req.body);
-
     if (error) {
       logger.error("Error validating request body", { error });
       next(new BadRequestError(error.message));

@@ -21,7 +21,6 @@ export const logout = async (
   next: NextFunction
 ) => {
   try {
-    console.log(req.body.refreshToken);
     await authService.logout(req.body.refreshToken!);
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {

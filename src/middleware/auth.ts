@@ -14,7 +14,6 @@ export const authenticate = (
   next: NextFunction
 ) => {
   const { authorization } = req.headers;
-
   if (!authorization) {
     next(new UnauthenticatedError("Unauthenticated"));
     return;
@@ -44,7 +43,6 @@ export const authorize = () => {
       return;
     }
 
-    console.log("user permissions", user.role);
     const hasPermission = user.role === "admin";
     logger.info("checking user permission", hasPermission);
 

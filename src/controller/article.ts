@@ -65,7 +65,11 @@ export const updateArticle = async (
   try {
     articleController.info("Updating article");
     const id = req.params.id;
-    const updateArticle = await articleService.updateArticle(id, req.body);
+    const updateArticle = await articleService.updateArticle(
+      id,
+      req.body,
+      req.file
+    );
     res.status(httpStatusCode.OK).json({
       message: "Article updated successfully",
     });

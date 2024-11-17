@@ -3,6 +3,8 @@ import { Article } from "../entity/Article";
 import { BadRequestError } from "../error/BadRequestError";
 import loggerWithNameSpace from "../utils/logger";
 import config from "../config";
+import fs from "fs/promises";
+import { deleteFiles } from "../utils/fileUtils";
 
 const articleService = loggerWithNameSpace("articleService");
 
@@ -22,55 +24,83 @@ const checkStatus = async (status: string) => {
 
 const getImageUrl = (imagePath: string | null): string | null => {
   if (!imagePath) return null;
-  return `${config.apiUrl}${imagePath}`;
+  const normalizedPath = imagePath.startsWith("/")
+    ? imagePath
+    : `/${imagePath}`;
+  return `${config.apiUrl}/public${encodeURI(normalizedPath)}`;
 };
 
 export const getArticles = async () => {
   const articles = await articleRepository.find();
-  return articles.map((article) => ({
+  return articles.map((article: Article) => ({
     ...article,
     image: getImageUrl(article.image),
   }));
 };
 
-export const createArticle = async (article: Article, file?: Express.Multer.File) => {
-  articleService.info("Creating new article with image");
-  const newArticle = new Article();
-  
-  if (!article.title || !article.content || !article.slug) {
-    throw new BadRequestError("Title, content and slug are required");
+export const createArticle = async (
+  article: Article,
+  file?: Express.Multer.File
+) => {
+  try {
+    articleService.info("Creating new article with image");
+    const newArticle = new Article();
+
+    if (!article.title || !article.content || !article.slug) {
+      if (file?.filename) await deleteFiles(file.filename);
+      throw new BadRequestError("Title, content and slug are required");
+    }
+
+    newArticle.title = article.title;
+    newArticle.image = file ? `${file.filename}` : "";
+    newArticle.content = article.content;
+    newArticle.viewCount = 0;
+    newArticle.slug = article.slug;
+    newArticle.status = article.status || "draft";
+    newArticle.isBreaking = Boolean(article.isBreaking);
+
+    const savedArticle = await articleRepository.save(newArticle);
+
+    return {
+      ...savedArticle,
+      image: getImageUrl(savedArticle.image),
+    };
+  } catch (error) {
+    // Clean up the uploaded file if anything fails
+    if (file?.filename) {
+      await deleteFiles(file.filename);
+    }
+    throw error;
   }
-
-  newArticle.title = article.title;
-  newArticle.image = file ? `/${file.filename}` : '';
-  newArticle.content = article.content;
-  newArticle.viewCount = 0;
-  newArticle.slug = article.slug;
-  newArticle.status = article.status || 'draft';
-  newArticle.isBreaking = Boolean(article.isBreaking);
-
-  console.log("Article to be saved:", newArticle);
-
-  const savedArticle = await articleRepository.save(newArticle);
-
-  return {
-    ...savedArticle,
-    image: getImageUrl(savedArticle.image),
-  };
 };
 
-export const newArticle = async (articleInformation: Article, file?: Express.Multer.File) => {
-  articleService.info("Checking if article with same slug already exists");
-  console.log("Article Information received:", articleInformation);
-  
-  const existingArticle = await findBySlug(articleInformation.slug);
-  if (existingArticle) {
-    throw new BadRequestError("Article with same slug already exists");
+export const newArticle = async (
+  articleInformation: Article,
+  file?: Express.Multer.File
+) => {
+  try {
+    articleService.info("Checking if article with same slug already exists");
+
+    const existingArticle = await findBySlug(articleInformation.slug);
+    if (existingArticle) {
+      if (file?.filename) {
+        articleService.info(`Deleting uploaded file: ${file.filename}`);
+        await deleteFiles(file.filename);
+      }
+      throw new BadRequestError("Article with same slug already exists");
+    }
+
+    articleService.info("Creating new article");
+    const newArticle = await createArticle(articleInformation, file);
+    return true;
+  } catch (error) {
+    // Clean up the uploaded file if anything fails
+    if (file?.filename) {
+      articleService.info(`Cleaning up file due to error: ${file.filename}`);
+      await deleteFiles(file.filename);
+    }
+    throw error;
   }
-  
-  articleService.info("Creating new article");
-  const newArticle = await createArticle(articleInformation, file);
-  return true;
 };
 
 export const getArticleById = async (id: number) => {
@@ -92,28 +122,50 @@ export const updateArticle = async (
   file?: Express.Multer.File
 ) => {
   articleService.info("Updating article");
-  const existingArticle = await findById(id);
-  if (!existingArticle) {
-    throw new BadRequestError("Article not found");
-  }
+  try {
+    const existingArticle = await findById(id);
+    if (!existingArticle) {
+      if (file) await deleteFiles(file.path);
+      throw new BadRequestError("Article not found");
+    }
 
-  if (await checkStatus(articleInformation.status || 'draft')) {
-    const updateData = {
-      ...articleInformation,
-      image: file ? `/${file.filename}` : existingArticle.image,
-    };
+    if (
+      articleInformation.slug &&
+      articleInformation.slug !== existingArticle.slug
+    ) {
+      const articleWithSlug = await findBySlug(articleInformation.slug);
+      if (articleWithSlug) {
+        articleService.info("Deleting file", file);
+        if (file) await deleteFiles(file.path);
+        throw new BadRequestError("Article with same slug already exists");
+      }
+    }
 
-    await articleRepository.update(id, updateData);
+    if (await checkStatus(existingArticle.status || "draft")) {
+      const updateData = {
+        ...articleInformation,
+        image: file ? `/${file.filename}` : existingArticle.image,
+      };
 
-    const updatedArticle = await findById(id);
-    return {
-      ...updatedArticle,
-      image: getImageUrl(updatedArticle?.image || ""),
-    };
-  } else {
-    throw new BadRequestError(
-      `${articleInformation.status} News cannot be edited`
-    );
+      await articleRepository.update(id, updateData);
+
+      const updatedArticle = await findById(id);
+      return {
+        ...updatedArticle,
+        image: getImageUrl(updatedArticle?.image || ""),
+      };
+    } else {
+      if (file) await deleteFiles(file.path);
+      throw new BadRequestError(
+        `${articleInformation.status} News cannot be edited`
+      );
+    }
+  } catch (error) {
+    // Clean up the uploaded file if anything fails
+    if (file?.filename) {
+      await deleteFiles(file.filename);
+    }
+    throw error;
   }
 };
 
