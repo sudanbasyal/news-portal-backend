@@ -33,7 +33,7 @@ const getImageUrl = (imagePath: string | null): string | null => {
 
 export const getArticles = async () => {
   const articles = await articleRepository.find({
-    relations: ['category']
+    relations: ["category"],
   });
   return articles.map((article: Article) => ({
     ...article,
@@ -42,7 +42,9 @@ export const getArticles = async () => {
 };
 
 const findCategoryById = async (categoryId: number) => {
-  const category = await AppDataSource.getRepository(Category).findOneBy({ id: categoryId });
+  const category = await AppDataSource.getRepository(Category).findOneBy({
+    id: categoryId,
+  });
   if (!category) {
     throw new BadRequestError("Category not found");
   }
@@ -57,12 +59,18 @@ export const createArticle = async (
     articleService.info("Creating new article with image");
     const newArticle = new Article();
 
-    if (!article.title || !article.content || !article.slug || !article.categoryId) {
+    if (
+      !article.title ||
+      !article.content ||
+      !article.slug ||
+      !article.categoryId
+    ) {
       if (file?.filename) await deleteFiles(file.filename);
-      throw new BadRequestError("Title, content, slug and categoryId are required");
+      throw new BadRequestError(
+        "Title, content, slug and categoryId are required"
+      );
     }
 
-    
     // Fetch the category first
     const category = await findCategoryById(article.categoryId);
 
@@ -123,12 +131,13 @@ export const getArticleById = async (id: number) => {
   articleService.info("fetching article based on its id");
   const article = await articleRepository.findOne({
     where: { id },
-    relations: ['category']
+    relations: ["category", "comments"],
   });
   if (!article) {
     throw new BadRequestError("Article not found");
   }
-
+  article.viewCount += 1;
+  await articleRepository.save(article);
   return {
     ...article,
     image: getImageUrl(article.image),
