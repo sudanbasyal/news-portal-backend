@@ -4,6 +4,7 @@ import { authenticate } from "../middleware/auth";
 import {
   createCategory,
   deleteCategory,
+  getAllArticlesByCategory,
   getAllCategories,
   getCategory,
   updateCategory,
@@ -21,4 +22,5 @@ categoryRouter.get("/all", getAllCategories);
 categoryRouter.get("/:id", getCategory);
 categoryRouter.patch("/:id", authenticate, updateCategory);
 categoryRouter.delete("/:id", authenticate, deleteCategory);
+categoryRouter.get("/:id/articles", getAllArticlesByCategory);
 export default categoryRouter;

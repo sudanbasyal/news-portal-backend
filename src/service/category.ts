@@ -23,9 +23,7 @@ export const createCategory = async (categoryData: Category) => {
 
 // Get all categories
 export const getAllCategories = async () => {
-  return await categoryRepository.find({
-    relations: ["articles"],
-  });
+  return await categoryRepository.find();
 };
 
 // Get single category
@@ -72,3 +70,15 @@ export const deleteCategory = async (id: number) => {
   await categoryRepository.delete(id);
   return true;
 };
+
+export const getAllArticlesByCategory = async (categoryId: number) => {
+  const category = await categoryRepository.findOne({
+    where: { id: categoryId },
+    relations: ["articles"],
+  });
+
+  if (!category) {
+    throw new BadRequestError("Category not found");
+  }
+  return category.articles;
+}

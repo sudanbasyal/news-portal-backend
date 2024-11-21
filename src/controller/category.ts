@@ -89,3 +89,21 @@ export const deleteCategory = async (
     next(error);
   }
 };
+
+export const getAllArticlesByCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    categoryController.info("Fetching articles by category");
+    const categoryId = req.params.id;
+    const articles = await categoryService.getAllArticlesByCategory(categoryId);
+    res.status(httpStatusCode.OK).json({
+      message: "Articles fetched successfully",
+      data: articles,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

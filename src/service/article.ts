@@ -20,7 +20,7 @@ const findBySlug = async (slug: string) => {
 };
 
 const checkStatus = async (status: string) => {
-  return status === "draft";
+  return status === "draft" || status === "published";
 };
 
 const getImageUrl = (imagePath: string | null): string | null => {
@@ -161,7 +161,8 @@ export const updateArticle = async (
     if (articleInformation.categoryId) {
       await findCategoryById(articleInformation.categoryId);
     }
-
+    console.log(articleInformation.slug,existingArticle.slug)
+    console.log(articleInformation.slug !== existingArticle.slug)
     if (
       articleInformation.slug &&
       articleInformation.slug !== existingArticle.slug
@@ -174,27 +175,23 @@ export const updateArticle = async (
       }
     }
 
-    if (await checkStatus(existingArticle.status || "draft")) {
-      const updateData = {
-        ...articleInformation,
-        image: file ? `/${file.filename}` : existingArticle.image,
-      };
+    const updateData = {
+      ...articleInformation,
+      image: file ? `/${file.filename}` : existingArticle.image,
+    };
 
-      await articleRepository.update(id, updateData);
+    await articleRepository.update(id, updateData);
 
-      const updatedArticle = await findById(id);
-      return {
-        ...updatedArticle,
-        image: getImageUrl(updatedArticle?.image || ""),
-      };
-    } else {
-      if (file) await deleteFiles(file.path);
-      throw new BadRequestError(
-        `${articleInformation.status} News cannot be edited`
-      );
-    }
+    const updatedArticle = await findById(id);
+    return {
+      ...updatedArticle,
+      image: getImageUrl(updatedArticle?.image || ""),
+    };
+
+   
   } catch (error) {
     // Clean up the uploaded file if anything fails
+    console.log(error)
     if (file?.filename) {
       await deleteFiles(file.filename);
     }
@@ -221,3 +218,4 @@ export const changeArticleStatus = async (id: number, status: string) => {
   await articleRepository.update(id, { status });
   return true;
 };
+
