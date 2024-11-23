@@ -19,7 +19,12 @@ app.use("/public", express.static(path.join(__dirname, "../public")));
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5432", "http://localhost:8080"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5432",
+      "http://localhost:8080",
+      "https://admin-newportal.vercel.app/",
+    ],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
