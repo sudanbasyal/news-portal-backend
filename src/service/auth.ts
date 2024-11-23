@@ -5,10 +5,12 @@ import config from "../config";
 import { sign, verify } from "jsonwebtoken";
 import { BadRequestError } from "../error/BadRequestError";
 import * as userService from "./user";
+import loggerWithNameSpace from "../utils/logger";
+const logger = loggerWithNameSpace("authService");
 export const login = async (body: Pick<User, "email" | "password">) => {
   const existingUser = await userService.findByEmail(body.email);
   if (!existingUser) {
-    return null;
+    throw new BadRequestError("User not found");
   }
 
   const userPassword = await comparePassword(

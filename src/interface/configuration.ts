@@ -14,6 +14,9 @@ interface DatabaseConfig {
   migrations: string[];
   subscribers: string[];
   namingStrategy?: NamingStrategyInterface;
+  ssl?: {
+    rejectUnauthorized: boolean;
+  };
 }
 
 export interface IConfig {

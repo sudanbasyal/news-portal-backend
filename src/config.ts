@@ -28,6 +28,9 @@ const config: IConfig = {
     migrations: ["src/migration/**/*.ts"],
     subscribers: ["src/subscriber/**/*.ts"],
     namingStrategy: new SnakeNamingStrategy(),
+    ssl: {
+      rejectUnauthorized: false
+    },
   },
 };
 

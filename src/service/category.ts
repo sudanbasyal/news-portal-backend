@@ -23,7 +23,15 @@ export const createCategory = async (categoryData: Category) => {
 
 // Get all categories
 export const getAllCategories = async () => {
-  return await categoryRepository.find();
+  const categories = await categoryRepository.find({
+    relations: ["articles"]
+  });
+
+  return categories.map(category => ({
+    id: category.id,
+    name: category.name,
+    articleCount: category.articles.length
+  }));
 };
 
 // Get single category

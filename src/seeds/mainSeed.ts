@@ -1,4 +1,5 @@
 import { AppDataSource } from "../dataSource";
+import { seedCategories } from "./categorySeed";
 import { userSeed } from "./userSeed";
 
 async function main() {
@@ -44,6 +45,7 @@ async function main() {
 
     // Seed the tables
     await userSeed();
+    await seedCategories();
     console.log("Seeding successful ");
   } catch (err) {
     console.log("Error:", err);
