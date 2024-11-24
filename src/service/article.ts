@@ -6,6 +6,8 @@ import config from "../config";
 import fs from "fs/promises";
 import { deleteFiles } from "../utils/fileUtils";
 import { Category } from "../entity/Category";
+import getImageUrl from "../utils/imageUrl";
+import { Like, ILike } from "typeorm";
 
 const articleService = loggerWithNameSpace("articleService");
 
@@ -23,13 +25,7 @@ const checkStatus = async (status: string) => {
   return status === "draft" || status === "published";
 };
 
-const getImageUrl = (imagePath: string | null): string | null => {
-  if (!imagePath) return null;
-  const normalizedPath = imagePath.startsWith("/")
-    ? imagePath
-    : `/${imagePath}`;
-  return `${config.apiUrl}/public${encodeURI(normalizedPath)}`;
-};
+
 
 export const getArticles = async () => {
   const articles = await articleRepository.find({
@@ -71,6 +67,9 @@ export const createArticle = async (
       );
     }
 
+    // Trim whitespace from slug
+    const trimmedSlug = article.slug.trim();
+
     // Fetch the category first
     const category = await findCategoryById(article.categoryId);
 
@@ -78,7 +77,7 @@ export const createArticle = async (
     newArticle.image = file ? `${file.filename}` : "";
     newArticle.content = article.content;
     newArticle.viewCount = 0;
-    newArticle.slug = article.slug;
+    newArticle.slug = trimmedSlug; // Use trimmed slug
     newArticle.status = article.status || "draft";
     newArticle.isBreaking = Boolean(article.isBreaking);
     newArticle.categoryId = category.id;
@@ -136,7 +135,7 @@ export const getArticleById = async (id: number) => {
   if (!article) {
     throw new BadRequestError("Article not found");
   }
-  article.viewCount += 1;
+  // article.viewCount += 1;
   await articleRepository.save(article);
   return {
     ...article,
@@ -161,13 +160,13 @@ export const updateArticle = async (
     if (articleInformation.categoryId) {
       await findCategoryById(articleInformation.categoryId);
     }
-    console.log(articleInformation.slug,existingArticle.slug)
-    console.log(articleInformation.slug !== existingArticle.slug)
+    console.log(articleInformation.slug, existingArticle.slug);
+    console.log(articleInformation.slug !== existingArticle.slug);
     if (
       articleInformation.slug &&
-      articleInformation.slug !== existingArticle.slug
+      articleInformation.slug.trim() !== existingArticle.slug
     ) {
-      const articleWithSlug = await findBySlug(articleInformation.slug);
+      const articleWithSlug = await findBySlug(articleInformation.slug.trim());
       if (articleWithSlug) {
         articleService.info("Deleting file", file);
         if (file) await deleteFiles(file.path);
@@ -177,6 +176,9 @@ export const updateArticle = async (
 
     const updateData = {
       ...articleInformation,
+      slug: articleInformation.slug
+        ? articleInformation.slug.trim()
+        : existingArticle.slug,
       image: file ? `/${file.filename}` : existingArticle.image,
     };
 
@@ -187,11 +189,9 @@ export const updateArticle = async (
       ...updatedArticle,
       image: getImageUrl(updatedArticle?.image || ""),
     };
-
-   
   } catch (error) {
     // Clean up the uploaded file if anything fails
-    console.log(error)
+    console.log(error);
     if (file?.filename) {
       await deleteFiles(file.filename);
     }
@@ -219,3 +219,65 @@ export const changeArticleStatus = async (id: number, status: string) => {
   return true;
 };
 
+export const getArticleBySlug = async (slug: string) => {
+  const article = await articleRepository.findOneBy({ slug });
+  if (!article) {
+    throw new BadRequestError("Article not found");
+  }
+  article.viewCount += 1;
+  await articleRepository.save(article);
+  return {
+    ...article,
+    image: getImageUrl(article.image),
+  };
+};
+
+export const searchArticles = async (query: string) => {
+  // Split search terms
+  const terms = query.toLowerCase().split(' ').filter(term => term.length > 2);
+  
+  if (terms.length === 0) {
+    return [];
+  }
+
+  // Create the base query
+  const queryBuilder = articleRepository.createQueryBuilder('article')
+    .leftJoinAndSelect('article.category', 'category');
+
+  // Add search conditions with scoring
+  const conditions: string[] = [];
+  const params: any = {};
+
+  terms.forEach((term, index) => {
+    const titleParam = `title${index}`;
+    const contentParam = `content${index}`;
+    params[titleParam] = `%${term}%`;
+    params[contentParam] = `%${term}%`;
+
+    conditions.push(
+      `(
+        CASE 
+          WHEN LOWER(article.title) LIKE :${titleParam} THEN 3
+          WHEN LOWER(article.content) LIKE :${contentParam} THEN 1
+          ELSE 0 
+        END
+      )`
+    );
+  });
+
+  // Combine all conditions with scoring
+  const scoreExpression = conditions.join(' + ');
+
+  const results = await queryBuilder
+    .addSelect(`(${scoreExpression})`, 'relevance_score')
+    .where(`(${scoreExpression}) > 0`)
+    .setParameters(params)
+    .orderBy('relevance_score', 'DESC')
+    .addOrderBy('article.createdAt', 'DESC')
+    .getMany();
+
+  return results.map((article) => ({
+    ...article,
+    image: getImageUrl(article.image),
+  }));
+};

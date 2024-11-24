@@ -4,12 +4,12 @@ import {
   allArticles,
   changeArticleStatus,
   getArticle,
+  getArticleBySlug,
+  searchArticles,
   updateArticle,
 } from "../controller/article";
+import { authenticate } from "../middleware/auth";
 import upload from "../middleware/fileUpload";
-import { validateReqBody } from "../middleware/validator";
-import { authenticate, authorize } from "../middleware/auth";
-import { addArticleSchema } from "../schema/article";
 
 const articleRouter = Router();
 
@@ -20,6 +20,8 @@ articleRouter.post(
   upload.single("image"),
   addArticle
 );
+articleRouter.get("/slug/:slug", getArticleBySlug);
+articleRouter.get("/search", searchArticles);
 articleRouter.get("/all", allArticles);
 articleRouter.get("/:id", getArticle);
 articleRouter.patch(
@@ -29,4 +31,5 @@ articleRouter.patch(
   updateArticle
 );
 articleRouter.patch("/:id/status", authenticate, changeArticleStatus);
+
 export default articleRouter;

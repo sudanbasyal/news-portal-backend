@@ -1,6 +1,7 @@
 import { AppDataSource } from "../dataSource";
 import { Category } from "../entity/Category";
 import { BadRequestError } from "../error/BadRequestError";
+import getImageUrl from "../utils/imageUrl";
 import loggerWithNameSpace from "../utils/logger";
 
 const categoryService = loggerWithNameSpace("categoryService");
@@ -24,13 +25,13 @@ export const createCategory = async (categoryData: Category) => {
 // Get all categories
 export const getAllCategories = async () => {
   const categories = await categoryRepository.find({
-    relations: ["articles"]
+    relations: ["articles"],
   });
 
-  return categories.map(category => ({
+  return categories.map((category) => ({
     id: category.id,
     name: category.name,
-    articleCount: category.articles.length
+    articleCount: category.articles.length,
   }));
 };
 
@@ -88,5 +89,8 @@ export const getAllArticlesByCategory = async (categoryId: number) => {
   if (!category) {
     throw new BadRequestError("Category not found");
   }
-  return category.articles;
-}
+  return category.articles.map((article) => ({
+    ...article,
+    image: getImageUrl(article.image),
+  }));
+};

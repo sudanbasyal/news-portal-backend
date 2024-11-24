@@ -3,7 +3,13 @@ import { NextFunction, Response } from "express";
 import { Request } from "../interface/request";
 import loggerWithNameSpace from "../utils/logger";
 import * as articleService from "../service/article";
+import { BadRequestError } from "../error/BadRequestError";
 const articleController = loggerWithNameSpace("articleController");
+
+// Add this interface for the query parameters
+interface SearchQuery {
+  q?: string;
+}
 
 export const addArticle = async (
   req: Request,
@@ -116,4 +122,45 @@ export const changeArticleStatus = async (
   }
 };
 
+export const searchArticles = async (
+  req: Request<any, any, any, SearchQuery>, // Specify the query type here
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    articleController.info("Searching articles");
+    const searchTerm = req.query.q;
 
+    if (!searchTerm) {
+      throw new BadRequestError("Search term is required");
+    }
+
+    const articles = await articleService.searchArticles(searchTerm);
+
+    res.status(httpStatusCode.OK).json({
+      message: "Articles searched successfully",
+      data: articles,
+      count: articles.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getArticleBySlug = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    articleController.info("Fetching article by slug");
+    const slug = req.params.slug;
+    const article = await articleService.getArticleBySlug(slug);
+    res.status(httpStatusCode.OK).json({
+      message: "Article fetched successfully",
+      data: article,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
