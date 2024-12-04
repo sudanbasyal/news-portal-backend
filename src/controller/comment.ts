@@ -13,6 +13,7 @@ export const addComment = async (
 ) => {
   try {
     commentController.info("adding comment");
+    console.log(req.body);
     const newComment = await commentService.createComment(
       req.body,
       req.params.id

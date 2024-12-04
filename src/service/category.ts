@@ -1,6 +1,7 @@
 import { AppDataSource } from "../dataSource";
 import { Category } from "../entity/Category";
 import { BadRequestError } from "../error/BadRequestError";
+import { PaginationOptions } from "../types/pagination";
 import getImageUrl from "../utils/imageUrl";
 import loggerWithNameSpace from "../utils/logger";
 
@@ -80,17 +81,47 @@ export const deleteCategory = async (id: number) => {
   return true;
 };
 
-export const getAllArticlesByCategory = async (categoryId: number) => {
-  const category = await categoryRepository.findOne({
-    where: { id: categoryId },
-    relations: ["articles"],
-  });
+export const getAllArticlesByCategory = async (
+  categoryId: number,
+  options: PaginationOptions = {}
+) => {
+  const page = options.page || 1;
+  const limit = options.limit || 5;
+  const skip = (page - 1) * limit;
 
-  if (!category) {
-    throw new BadRequestError("Category not found");
-  }
-  return category.articles.map((article) => ({
-    ...article,
-    image: getImageUrl(article.image),
-  }));
+  // Get total count of articles in this category
+  const totalCount = await categoryRepository
+    .createQueryBuilder("category")
+    .leftJoin("category.articles", "article")
+    .where("category.id = :categoryId", { categoryId })
+    .select("COUNT(DISTINCT article.id)", "count")
+    .getRawOne()
+    .then((result) => Number(result.count));
+
+  // Get paginated articles
+  const articlesList = await categoryRepository
+    .createQueryBuilder("category")
+    .leftJoinAndSelect("category.articles", "article")
+    .where("category.id = :categoryId", { categoryId })
+    .orderBy("article.createdAt", "DESC")
+    .skip(skip)
+    .take(limit)
+    .getOne()
+    .then((category) => category?.articles || []);
+
+  const lastPage = Math.ceil(totalCount / limit);
+  console.log(articlesList);
+  return {
+    articles: articlesList.map((article) => ({
+      ...article,
+      image: getImageUrl(article.image),
+    })),
+    meta: {
+      total: totalCount,
+      page,
+      lastPage,
+      hasNextPage: page < lastPage,
+      hasPreviousPage: page > 1,
+    },
+  };
 };

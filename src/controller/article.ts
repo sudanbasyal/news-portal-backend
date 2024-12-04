@@ -11,6 +11,12 @@ interface SearchQuery {
   q?: string;
 }
 
+// Add this interface at the top
+interface PaginationQuery {
+  page?: string;
+  limit?: string;
+}
+
 export const addArticle = async (
   req: Request,
   res: Response,
@@ -29,16 +35,19 @@ export const addArticle = async (
 };
 
 export const allArticles = async (
-  req: Request,
+  req: Request<any, any, any, PaginationQuery>,
   res: Response,
   next: NextFunction
 ) => {
   try {
     articleController.info("Fetching all articles");
-    const allArticles = await articleService.getArticles();
+    const page = parseInt(req.query.page || "1", 10);
+    const limit = parseInt(req.query.limit || "5", 10);
+
+    const allArticles = await articleService.getArticles({ page, limit });
     res.status(httpStatusCode.OK).json({
       message: "All articles fetched successfully",
-      data: allArticles,
+      ...allArticles,
     });
   } catch (error) {
     next(error);
@@ -159,6 +168,26 @@ export const getArticleBySlug = async (
     res.status(httpStatusCode.OK).json({
       message: "Article fetched successfully",
       data: article,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getBreakingNews = async (
+  req: Request<any, any, any, PaginationQuery>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    articleController.info("Fetching breaking news");
+    const page = parseInt(req.query.page || "1", 10);
+    const limit = parseInt(req.query.limit || "5", 10);
+
+    const breakingNews = await articleService.getBreakingNews({ page, limit });
+    res.status(httpStatusCode.OK).json({
+      message: "Breaking news fetched successfully",
+      ...breakingNews,
     });
   } catch (error) {
     next(error);

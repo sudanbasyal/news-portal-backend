@@ -9,12 +9,13 @@ const commentRepository = AppDataSource.getRepository(Comment);
 const articleRepository = AppDataSource.getRepository(Article);
 export const createComment = async (comment: Comment, articleId: number) => {
   // check if article exists
-
+  commentService.info("checking if article exists");
   const article = await articleRepository.findOneBy({ id: articleId });
   if (!article) {
     throw new BadRequestError("Article not found");
   }
   commentService.info("creating comment");
+  console.log(comment);
   const newComment = commentRepository.create(comment);
   newComment.article = article;
   await commentRepository.save(newComment);

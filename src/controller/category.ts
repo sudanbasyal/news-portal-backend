@@ -3,8 +3,12 @@ import { NextFunction, Response } from "express";
 import { Request } from "../interface/request";
 import loggerWithNameSpace from "../utils/logger";
 import * as categoryService from "../service/category";
+import * as articleService from "../service/article";
 const categoryController = loggerWithNameSpace("categoryController");
-
+interface PaginationQuery {
+  page?: string;
+  limit?: string;
+}
 export const createCategory = async (
   req: Request,
   res: Response,
@@ -91,19 +95,25 @@ export const deleteCategory = async (
 };
 
 export const getAllArticlesByCategory = async (
-  req: Request,
+  req: Request<any, any, any, PaginationQuery>,
   res: Response,
   next: NextFunction
 ) => {
   try {
     categoryController.info("Fetching articles by category");
     const categoryId = req.params.id;
-    const articles = await categoryService.getAllArticlesByCategory(categoryId);
+    const page = parseInt(req.query.page || "1", 10);
+    const limit = parseInt(req.query.limit || "5", 10);
+
+    const articles = await articleService.getAllArticlesByCategory(categoryId, {
+      page,
+      limit,
+    });
     res.status(httpStatusCode.OK).json({
       message: "Articles fetched successfully",
-      data: articles,
+      ...articles,
     });
   } catch (error) {
     next(error);
   }
-}
+};

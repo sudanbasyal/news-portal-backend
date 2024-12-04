@@ -18,8 +18,9 @@ export class Comment {
   @Column()
   content: string;
 
-  @Column()
+  @Column({ nullable: true })
   phone: string;
+  //nullable: true
 
   @CreateDateColumn()
   createdAt: Date;

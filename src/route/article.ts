@@ -5,6 +5,7 @@ import {
   changeArticleStatus,
   getArticle,
   getArticleBySlug,
+  getBreakingNews,
   searchArticles,
   updateArticle,
 } from "../controller/article";
@@ -23,6 +24,7 @@ articleRouter.post(
 articleRouter.get("/slug/:slug", getArticleBySlug);
 articleRouter.get("/search", searchArticles);
 articleRouter.get("/all", allArticles);
+articleRouter.get("/breaking", getBreakingNews);
 articleRouter.get("/:id", getArticle);
 articleRouter.patch(
   "/:id",

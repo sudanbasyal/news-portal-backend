@@ -7,4 +7,6 @@ export interface Request<P = any, ResBody = any, ReqBody = any, ReqQuery = {}>
   refreshToken?: string | null;
   file?: Express.Multer.File;
   searchTerm?: string | null;
+  page?: string;
+  limit?: string;
 }
