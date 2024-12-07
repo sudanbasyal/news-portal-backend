@@ -1,0 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UnauthenticatedError = void 0;
+const BaseError_1 = require("./BaseError");
+class UnauthenticatedError extends BaseError_1.BaseError {
+}
+exports.UnauthenticatedError = UnauthenticatedError;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVW5hdXRoZW50aWNhdGVkRXJyb3IuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvZXJyb3IvVW5hdXRoZW50aWNhdGVkRXJyb3IudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsMkNBQXdDO0FBRXhDLE1BQWEsb0JBQXFCLFNBQVEscUJBQVM7Q0FBRztBQUF0RCxvREFBc0QiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBCYXNlRXJyb3IgfSBmcm9tIFwiLi9CYXNlRXJyb3JcIjtcclxuXHJcbmV4cG9ydCBjbGFzcyBVbmF1dGhlbnRpY2F0ZWRFcnJvciBleHRlbmRzIEJhc2VFcnJvciB7fVxyXG4iXX0=

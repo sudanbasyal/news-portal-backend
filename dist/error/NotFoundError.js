@@ -1,0 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NotFoundError = void 0;
+const BaseError_1 = require("./BaseError");
+class NotFoundError extends BaseError_1.BaseError {
+}
+exports.NotFoundError = NotFoundError;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiTm90Rm91bmRFcnJvci5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9lcnJvci9Ob3RGb3VuZEVycm9yLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUFBLDJDQUF3QztBQUV4QyxNQUFhLGFBQWMsU0FBUSxxQkFBUztDQUFHO0FBQS9DLHNDQUErQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IEJhc2VFcnJvciB9IGZyb20gXCIuL0Jhc2VFcnJvclwiO1xyXG5cclxuZXhwb3J0IGNsYXNzIE5vdEZvdW5kRXJyb3IgZXh0ZW5kcyBCYXNlRXJyb3Ige31cclxuIl19

@@ -1,0 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../controller/auth");
+const authRouter = (0, express_1.Router)();
+authRouter.post("/login", auth_1.login);
+authRouter.post("/logout", auth_1.logout);
+exports.default = authRouter;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXV0aC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9yb3V0ZS9hdXRoLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEscUNBQWlDO0FBRWpDLDZDQUFtRDtBQUVuRCxNQUFNLFVBQVUsR0FBRyxJQUFBLGdCQUFNLEdBQUUsQ0FBQztBQUM1QixVQUFVLENBQUMsSUFBSSxDQUFDLFFBQVEsRUFBRSxZQUFLLENBQUMsQ0FBQztBQUNqQyxVQUFVLENBQUMsSUFBSSxDQUFDLFNBQVMsRUFBRSxhQUFNLENBQUMsQ0FBQztBQUVuQyxrQkFBZSxVQUFVLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBSb3V0ZXIgfSBmcm9tIFwiZXhwcmVzc1wiO1xyXG5cclxuaW1wb3J0IHsgbG9naW4sIGxvZ291dCB9IGZyb20gXCIuLi9jb250cm9sbGVyL2F1dGhcIjtcclxuXHJcbmNvbnN0IGF1dGhSb3V0ZXIgPSBSb3V0ZXIoKTtcclxuYXV0aFJvdXRlci5wb3N0KFwiL2xvZ2luXCIsIGxvZ2luKTtcclxuYXV0aFJvdXRlci5wb3N0KFwiL2xvZ291dFwiLCBsb2dvdXQpO1xyXG5cclxuZXhwb3J0IGRlZmF1bHQgYXV0aFJvdXRlcjtcclxuIl19

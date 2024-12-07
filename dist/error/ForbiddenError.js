@@ -1,0 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ForbiddenError = void 0;
+const BaseError_1 = require("./BaseError");
+class ForbiddenError extends BaseError_1.BaseError {
+}
+exports.ForbiddenError = ForbiddenError;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRm9yYmlkZGVuRXJyb3IuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvZXJyb3IvRm9yYmlkZGVuRXJyb3IudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsMkNBQXdDO0FBRXhDLE1BQWEsY0FBZSxTQUFRLHFCQUFTO0NBQUc7QUFBaEQsd0NBQWdEIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgQmFzZUVycm9yIH0gZnJvbSBcIi4vQmFzZUVycm9yXCI7XHJcblxyXG5leHBvcnQgY2xhc3MgRm9yYmlkZGVuRXJyb3IgZXh0ZW5kcyBCYXNlRXJyb3Ige31cclxuIl19
